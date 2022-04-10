@@ -11,7 +11,7 @@
 	export default {
 		data() {
 			return {
-				title: '测试'
+				title: '测试提交成功'
 			}
 		},
 		onLoad() {
