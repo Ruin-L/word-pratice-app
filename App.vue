@@ -12,6 +12,9 @@
 	}
 </script>
 
-<style>
+<style lang="scss">
 	/*每个页面公共css */
+	.container{
+		padding: 0 30rpx;
+	}
 </style>

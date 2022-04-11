@@ -1,8 +1,9 @@
 <template>
-	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view class="text-area">
-			<text class="title">{{title}}</text>
+	<view class="home-root">
+		<view class="container">
+			<view class="word-box" v-for="item in wordDivArray" :key="item.id" @tap="navgateToAnswer(item.id)" >
+				{{item.text}}
+			</view>
 		</view>
 	</view>
 </template>
@@ -11,42 +12,73 @@
 	export default {
 		data() {
 			return {
-				title: '测试提交成功'
+				wordDivArray:[{
+					id:'1',
+					text:'一级词汇难度'
+				},{
+					id:'2',
+					text:'二级词汇难度'
+				},{
+					id:'3',
+					text:'三级词汇难度'
+				},{
+					id:'4',
+					text:'四级词汇难度'
+				},{
+					id:'5',
+					text:'五级词汇难度'
+				},{
+					id:'6',
+					text:'六级词汇难度'
+				},{
+					id:'7',
+					text:'七级词汇难度'
+				}]
 			}
 		},
 		onLoad() {
 
 		},
 		methods: {
-
+			navgateToAnswer(id){
+				uni.navigateTo({
+					url:"../answer-detail/answer-detail?wordId="+id,
+				})
+				// console.log('触发')
+			}
 		}
 	}
 </script>
 
-<style>
-	.content {
+<style lang="scss" scoped>
+
+	.home-root{
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
+		.word-box{
+			box-sizing: border-box;
+			width: 100%;
+			height: 120rpx;
+			border-radius: 20rpx;
+			margin:40rpx 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #FFFFFF;
+			border: 2rpx solid #4CD964;
+			&:nth-child(1){
+				margin-top: 30rpx;
+			}
+			&:nth-child(odd){
+				background: linear-gradient(135deg,#43cbff,#9708cc);
+			}
+			&:nth-child(even){
+				background: linear-gradient(135deg,#f54ea2,#ff7676);
+				
+			}
+					
+			}
 	}
-
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin-top: 200rpx;
-		margin-left: auto;
-		margin-right: auto;
-		margin-bottom: 50rpx;
-	}
-
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
-
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+	
 </style>
