@@ -1,54 +1,58 @@
 <template>
 	<view class="answer-root">
-		<view class="container" v-if="wordData.wordName">
+		<view class="container" >
+<view v-for="(item,index) in wordData" :key="wordData._id" >
+
+		<view v-if="index == currentIndex">
 			<!-- 题目选项卡模块开始 -->
-			<view class="answer-box" >
-				<view class="title">
-					<text class="left-title">单选题（难度等级{{wordData.level}}）</text>
-					<text class="right-condition">
-						<text>{{pageSize}}</text>
-						<text>/{{pageNum}}</text>
-					</text>
-				</view>
-				<view class="content">
-					<view>{{wordData.wordName}}</view>
-					<view>
-						<text>音标：{{wordData.phonetic}}</text>
-						<text>读音：{{wordData.pronunciation}} </text>
+			<view class="answer-box"  >
+					<view class="title" >
+						<text class="left-title">单选题（难度等级{{item.difficulty}}）</text>
+						<text class="right-condition">
+							<text>{{index+1}}</text>
+							<text>/{{pageNum}}</text>
+						</text>
 					</view>
-				</view>
-				<view class="select-item">
-					<text v-for="(item,index) in wordData.options" :key="item.itemId"
-						:class="{'isSelected':index == selectIndex}"
-						@click="getSelectedItem(item,index)">{{item.itemId}} {{item.itemContent}}</text>
-
-				</view>
-
-
+					<view class="content">
+						<view>{{item.wordName}}</view>
+						<view class="read">
+							<text>音标：{{item.phonetic}}</text>
+							<text>读音：{{item.pronunciation}}
+							 <image src="../../static/icon/listen.png" mode="widthFix"></image>
+							 </text>
+						</view>
+					</view>
+					<!-- <view class="select-item">
+						<text v-for="(item,index) in wordData.options" :key="item.itemId"
+							:class="{'isSelected':index == selectIndex}"
+							@click="getSelectedItem(item,index)">{{item.itemId}} {{item.itemContent}}</text>
+					</view> -->
+				
+				
 			</view>
 			<!-- 题目选项卡模块结束 -->
-
 			<!-- 翻页按钮模块开始 -->
 			<view class="page-btn">
 				<view class="btn">
-					<button type="default" @tap="previous" v-if="pageSize != 1">
+					<button type="default" @tap="previous(index)" v-if="currentIndex > 2">
 						上一题
 					</button>
-					<button type="default" @tap="next" v-if="pageSize != 10">
+					<button type="default" @tap="next(index)" v-if="currentIndex < 11">
 						下一题
 					</button>
-					<button type="default" @tap="messageToggle('error')" v-if="pageSize == 10">
+					<button type="default" @tap="messageToggle('error')" v-if="currentIndex == 11">
 						提交！
 					</button>
 				</view>
-
+			
 			</view>
 			<!-- 翻页按钮模块结束 -->
+			</view>
+				</view>
+
+			
 		</view>
 		
-		<view  class="noData" v-else-if="!wordData.worName">
-			<text>暂无数据~</text>
-		</view>
 		<view>
 		
 			<!-- 提示窗示例 -->
@@ -67,8 +71,9 @@
 				selectIndex: -1,
 				pageSize: 1,
 				pageNum: 10,
+				currentIndex:0,
 				level: '',
-				wordData:{},
+				wordData:[],
 				type: 'center',
 				msgType: 'success',
 				messageText: '这是一条成功提示',
@@ -78,30 +83,31 @@
 		},
 		methods: {
 			// 获取当前选中的选项
-			getSelectedItem(item, itemIndex) {
-				this.selectIndex = itemIndex
-				if (item.right) {
-					console.log('选择正确')
-				}
-				console.log(item, '选中的项')
-			},
+			// getSelectedItem(item, itemIndex) {
+			// 	this.selectIndex = itemIndex
+			// 	if (item.right) {
+			// 		console.log('选择正确')
+			// 	}
+			// 	console.log(item, '选中的项')
+			// },
 
 			// 获取上一题
-			previous() {
-				if (this.pageSize > 1) {
-					this.pageSize--
-				}
-
-				console.log('回到上一题')
+			previous(index) {
+				// if (this.pageSize > 1) {
+				// 	this.pageSize--
+				// }
+				this.currentIndex--;
+				console.log('回到上一题',this.currentIndex,index)
 			},
 
 			// 获取下一题
-			next() {
-				if (this.pageSize < 10) {
-					this.pageSize++
-				}
-				this.getApiQuestionData()
-				console.log('跳转到下一题')
+			next(index) {
+				// if (this.pageSize < 10) {
+				// 	this.pageSize++
+				// }
+this.currentIndex++;
+				// this.getApiQuestionData()
+				console.log('跳转到下一题',index)
 			},
 			// 提交成功获取的信息
 			messageToggle(type) {
@@ -128,10 +134,8 @@
 						name:'provideQuestion',
 						data:{level:this.level,pageSize:this.pageSize}
 					})
-					if(result.data[0] != undefined){
-						this.wordData = result.data[0].wordData
-						console.log('题目数据获取',result.data[0])
-					}
+						this.wordData = result.data
+						console.log('题目数据获取',result.data)
 					
 				}catch(e){
 					console.error(e)
@@ -201,6 +205,12 @@
 			}
 
 			.content {
+				.read{
+					image{
+						width: 40rpx;
+						height: 40rpx;
+					}
+				}
 				view {
 					min-height: 100rpx;
 					display: flex;

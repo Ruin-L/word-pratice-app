@@ -30,9 +30,6 @@
 				},{
 					id:'6',
 					text:'六级词汇难度'
-				},{
-					id:'7',
-					text:'七级词汇难度'
 				}]
 			}
 		},
@@ -70,6 +67,9 @@
 			&:nth-child(1){
 				margin-top: 30rpx;
 			}
+			// &:nth-child(n+1){
+			// 	opacity: 0.5;
+			// }
 			&:nth-child(odd){
 				background: linear-gradient(135deg,#43cbff,#9708cc);
 			}
