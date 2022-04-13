@@ -17,8 +17,9 @@
 						<view>{{item.wordName}}</view>
 						<view class="read">
 							<text>音标：{{item.phonetic}}</text>
-							<text>读音：{{item.pronunciation}}
+							<text @tap="getAudioResource">读音：{{item.pronunciation}}
 							 <image src="../../static/icon/listen.png" mode="widthFix"></image>
+							<audio  :src="current.src"   controls></audio>
 							 </text>
 						</view>
 					</view>
@@ -32,10 +33,10 @@
 			<!-- 翻页按钮模块开始 -->
 			<view class="page-btn">
 				<view class="btn">
-					<button type="default" @tap="previous(index)" v-if="currentIndex >= 1">
+					<button type="default" @tap="previous(index,item.wordName)" v-if="currentIndex >= 1">
 						上一个单词
 					</button>
-					<button type="default" @tap="next(index)" >
+					<button type="default" @tap="next(index,item.wordName)" v-if="currentIndex < pageNum" >
 						下一个单词
 					</button>
 				</view>
@@ -64,8 +65,8 @@
 		data() {
 			return {
 				selectIndex: -1,
-				pageSize: 1,
-				pageNum: 3155,
+				pageSize: 21,
+				pageNum: '',
 				currentIndex:0,
 				level: '',
 				wordData:[],
@@ -73,39 +74,49 @@
 				msgType: 'success',
 				messageText: '这是一条成功提示',
 				value: '',
-				resultDialog: '您的成绩合格！'
+				resultDialog: '您的成绩合格！',
+				audio:'',
+				current: {								
+								src: '',
+							audioAction: {
+								method: 'pause'
+							},
+							}
 			};
 		},
 		methods: {
 
 			// 获取上一题
-			previous(index) {
-				// if (this.pageSize > 1) {
-				// 	this.pageSize--
-				// }
+			previous(index,wordName) {
+				this.getAudioResource()
 				this.currentIndex--;
-				console.log('回到上一题',this.currentIndex,index)
+				this.audio = this.wordData[index-1].wordName;
+				console.log('回到上一题',index,this.wordData[index-1].wordName)
 			},
 
 			// 获取下一题
-			next(index) {
-				// if (this.pageSize < 10) {
-				// 	this.pageSize++
-				// }
-this.currentIndex++;
-				// this.getApiQuestionData()
-				console.log('跳转到下一题',index)
+			next(index,wordName) {
+					this.currentIndex++;
+					if(this.currentIndex % 20 == 1){
+						this.getApiQuestionData();
+					}
+					this.audio = this.wordData[index+1].wordName;
+					this.getAudioResource()
+				console.log('跳转到下一题',index,this.wordData[index+1].wordName)
 			},
+			
 			// 提交成功获取的信息
 			messageToggle(type) {
 				this.msgType = type
 				this.$refs.alertDialog.open()
 			},
+			
 			//确认提交
 			dialogConfirm() {
 				console.log('点击确认')
 				this.$refs.alertDialog.open()
 			},
+			
 			// 关闭提交窗口
 			dialogClose() {
 				uni.switchTab({
@@ -118,11 +129,21 @@ this.currentIndex++;
 			async getApiQuestionData(){
 				try{
 					const {result} = await uniCloud.callFunction({
-						name:'provideQuestion',
-						data:{level:this.level,pageSize:this.pageSize}
+						name:'reciteWords',
+						data:{pageSize:this.pageSize}
 					})
-						this.wordData = result.data
-						console.log('题目数据获取',result.data)
+					result.res.data.forEach(e=>{
+						this.wordData.push(e);
+					})
+					this.pageNum = result.res.total
+					if(this.wordData.length<22){
+						this.audio = this.wordData[0].wordName;
+						this.getAudioResource()
+					}
+					
+					
+
+						console.log('题目数据获取',this.wordData)
 					
 				}catch(e){
 					console.error(e)
@@ -130,13 +151,23 @@ this.currentIndex++;
 				}
 			
 				
-			}
+			},
 
+			// 获取音频链接
+			getAudioResource(){
+				this.current.src = 'http://dict.youdao.com/dictvoice?type=0&audio=' + this.audio
+				console.log(this.current.src)
+			}
 		},
 		onLoad(option) {
-			this.level = option.wordId;
+		
 				this.getApiQuestionData()
-			console.log('获取到', this.level)
+				// setTimeout(()=>{
+				// 					this.audio = this.wordData[0].wordName;
+				// 					this.getAudioResource()
+				// 				},2000)
+				
+				
 		}
 	}
 </script>
@@ -195,6 +226,8 @@ this.currentIndex++;
 				.read{
 					display: flex;
 					align-items: center;
+					position: relative;
+					
 					
 					image{
 						// line-height: 36rpx;
@@ -229,14 +262,14 @@ this.currentIndex++;
 				text {
 					min-height: 100rpx;
 					margin: 20rpx 0;
+					
 
 					&:nth-child(4) {
 						margin-bottom: 0;
 					}
-
 					border: 2rpx solid #dee1e6;
 					border-radius: 8rpx;
-					padding: 0 20rpx;
+					padding: 20rpx;
 					background-color: #f2f5f8;
 					display: block;
 					display: flex;
@@ -271,4 +304,31 @@ this.currentIndex++;
 		font-size: 30rpx;
 		text-align: center;
 	}
+	/deep/ .uni-audio-default{
+		min-width:0rpx !important;
+		position: absolute;
+		padding: 0 !important;
+		margin: 0 !important;
+		height: 40rpx;
+		width: 40rpx;
+		
+		top: 30rpx;
+		right: 190rpx;
+		opacity: 0;
+	}
+	/deep/ .uni-audio-right{
+		display: none !important;
+		
+	}
+	/deep/ .uni-audio-button{
+		margin: 0 !important;
+		height: 40rpx;
+		width: 40rpx;
+	}
+	/deep/ .uni-audio-left{
+		// height: 40rpx;
+		// display: none !important;
+		
+	}
+
 </style>

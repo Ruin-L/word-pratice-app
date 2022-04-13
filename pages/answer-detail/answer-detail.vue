@@ -135,7 +135,7 @@ this.currentIndex++;
 						data:{level:this.level,pageSize:this.pageSize}
 					})
 						this.wordData = result.data
-						console.log('题目数据获取',result.data)
+						console.log('题目数据获取',result)
 					
 				}catch(e){
 					console.error(e)
