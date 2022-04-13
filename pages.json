@@ -10,7 +10,7 @@
             "path" : "pages/recitation/index",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "单词背诵",
                 "enablePullDownRefresh": false
             }
             

@@ -15,18 +15,18 @@
 					</view>
 					<view class="content">
 						<view>{{item.wordName}}</view>
-						<view class="read">
+						<!-- <view class="read">
 							<text>音标：{{item.phonetic}}</text>
 							<text>读音：{{item.pronunciation}}
 							 <image src="../../static/icon/listen.png" mode="widthFix"></image>
 							 </text>
-						</view>
+						</view> -->
 					</view>
-					<!-- <view class="select-item">
-						<text v-for="(item,index) in wordData.options" :key="item.itemId"
-							:class="{'isSelected':index == selectIndex}"
-							@click="getSelectedItem(item,index)">{{item.itemId}} {{item.itemContent}}</text>
-					</view> -->
+					<view class="select-item">
+						<text v-for="(itemOptions,indexOptions) in item.options" :key="indexOptions"
+							:class="{'isSelected':indexOptions == selectIndex}"
+							@click="getSelectedItem(itemOptions,indexOptions)"> {{itemOptions}}</text>
+					</view>
 				
 				
 			</view>
@@ -34,13 +34,13 @@
 			<!-- 翻页按钮模块开始 -->
 			<view class="page-btn">
 				<view class="btn">
-					<button type="default" @tap="previous(index)" v-if="currentIndex > 2">
+					<button type="default" @tap="previous(index)" v-if="currentIndex >= 1">
 						上一题
 					</button>
-					<button type="default" @tap="next(index)" v-if="currentIndex < 11">
+					<button type="default" @tap="next(index)" v-if="currentIndex < 9">
 						下一题
 					</button>
-					<button type="default" @tap="messageToggle('error')" v-if="currentIndex == 11">
+					<button type="default" @tap="messageToggle('error')" v-if="currentIndex == 9">
 						提交！
 					</button>
 				</view>
@@ -83,13 +83,13 @@
 		},
 		methods: {
 			// 获取当前选中的选项
-			// getSelectedItem(item, itemIndex) {
-			// 	this.selectIndex = itemIndex
-			// 	if (item.right) {
-			// 		console.log('选择正确')
-			// 	}
-			// 	console.log(item, '选中的项')
-			// },
+			getSelectedItem(item, itemIndex) {
+				this.selectIndex = itemIndex
+				if (item.right) {
+					console.log('选择正确')
+				}
+				console.log(item, '选中的项')
+			},
 
 			// 获取上一题
 			previous(index) {
@@ -206,9 +206,14 @@ this.currentIndex++;
 
 			.content {
 				.read{
+					display: flex;
+					align-items: center;
+					
 					image{
-						width: 40rpx;
-						height: 40rpx;
+						// line-height: 36rpx;
+						vertical-align:middle;
+						width: 36rpx;
+						height: 36rpx;
 					}
 				}
 				view {
