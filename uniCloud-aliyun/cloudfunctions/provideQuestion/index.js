@@ -35,6 +35,7 @@ exports.main = async (event, context) => {
 	})
 
 	// 打乱题目选项
+	let resData = [];
 	data.forEach((item, index) => {
 		if (item.options) {
 			item.options.sort(() => {
@@ -46,7 +47,12 @@ exports.main = async (event, context) => {
 			item.options[2] = `C. ${item.options[2]}`
 			item.options[3] = `D. ${item.options[3]}`
 		}
+		if(index<10){
+			resData.push(item)
+			
+		}
 	})
+	
 	
 	console.log('选项列表', optionData)
 	console.log('入参：页码+难度', event, res)
@@ -54,6 +60,6 @@ exports.main = async (event, context) => {
 	return {
 		code: 200,
 		msg: 'success',
-		data,
+		resData,
 	}
 };

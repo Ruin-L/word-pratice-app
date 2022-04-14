@@ -15,33 +15,32 @@
 					</view>
 					<view class="content">
 						<view>{{item.wordName}}</view>
-						<!-- <view class="read">
-							<text>音标：{{item.phonetic}}</text>
-							<text>读音：{{item.pronunciation}}
-							 <image src="../../static/icon/listen.png" mode="widthFix"></image>
-							 </text>
-						</view> -->
 					</view>
 					<view class="select-item">
 						<text v-for="(itemOptions,indexOptions) in item.options" :key="indexOptions"
-							:class="{'isSelected':indexOptions == selectIndex}"
-							@click="getSelectedItem(itemOptions,indexOptions)"> {{itemOptions}}</text>
+						@click="getSelectedItem(itemOptions,index)"
+							:class="{'isSelected':  mySelectArr[index] == itemOptions}"
+							> {{itemOptions}}</text>
 					</view>
 				
 				
 			</view>
 			<!-- 题目选项卡模块结束 -->
+			
 			<!-- 翻页按钮模块开始 -->
 			<view class="page-btn">
 				<view class="btn">
-					<button type="default" @tap="previous(index)" v-if="currentIndex >= 1">
+					<button type="default" @tap="previous(index,item)" v-if="currentIndex >= 1">
 						上一题
 					</button>
-					<button type="default" @tap="next(index)" v-if="currentIndex < 9">
+					<button type="default" @tap="next(index,item)" v-if="currentIndex < 9">
 						下一题
 					</button>
-					<button type="default" @tap="messageToggle('error')" v-if="currentIndex == 9">
+					<button type="default" @tap="messageToggle('error')" v-if="currentIndex == 9 && mySelectArr.length==10">
 						提交！
+					</button>
+					<button type="default" v-if="currentIndex == 9 && mySelectArr.length<10">
+						还有题目未完成！
 					</button>
 				</view>
 			
@@ -57,7 +56,7 @@
 		
 			<!-- 提示窗示例 -->
 			<uni-popup ref="alertDialog" type="dialog">
-				<uni-popup-dialog :type="msgType" cancelText="返回首页" confirmText="继续下一难度" title="通知"
+				<uni-popup-dialog :type="msgType" cancelText="返回首页" :confirmText="confirmText" :title="testRes"
 					:content="resultDialog" @confirm="dialogConfirm" @close="dialogClose"></uni-popup-dialog>
 			</uni-popup>
 		</view>
@@ -68,51 +67,98 @@
 	export default {
 		data() {
 			return {
-				selectIndex: -1,
+				selectIndexArr: [],
 				pageSize: 1,
 				pageNum: 10,
 				currentIndex:0,
+				score:0,
 				level: '',
 				wordData:[],
+				selectItem:'',
 				type: 'center',
 				msgType: 'success',
 				messageText: '这是一条成功提示',
 				value: '',
-				resultDialog: '您的成绩合格！'
+				// 我的答案
+				mySelectArr:[],
+				// 正确答案
+				rightSelectArr:[],
+				testRes:'',
+				resultDialog: '您的成绩合格！',
+				confirmText:'',
+				difficultLevel:0,
 			};
 		},
 		methods: {
-			// 获取当前选中的选项
-			getSelectedItem(item, itemIndex) {
-				this.selectIndex = itemIndex
-				if (item.right) {
-					console.log('选择正确')
-				}
-				console.log(item, '选中的项')
+			// 获取当前选中的选项并存到数组中
+			getSelectedItem(item, index) {
+				this.mySelectArr[index] = item
+				this.$set(this.mySelectArr,this.mySelectArr[index],item)
+
+				console.log('当前的选项',this.mySelectArr[index])
 			},
 
 			// 获取上一题
-			previous(index) {
-				// if (this.pageSize > 1) {
-				// 	this.pageSize--
-				// }
+			previous(index,source) {
 				this.currentIndex--;
-				console.log('回到上一题',this.currentIndex,index)
+				console.log('回到上一题',source)
 			},
 
 			// 获取下一题
-			next(index) {
+			next(index,source) {
 				this.currentIndex++;
-				console.log('跳转到下一题',index)
+				console.log('跳转到下一题',source)
 			},
 			// 提交成功获取的信息
 			messageToggle(type) {
+				for(let i = 0;i<this.pageNum;i++){
+					if(this.mySelectArr[i].slice(3) == this.rightSelectArr[i]){
+						this.score++
+					}
+					
+					
+				}
+				this.score = this.score*10
+				this.resultDialog = `您最后的分数为：${this.score}`
+				if(this.score>=60 && this.difficultLevel < 6){
+					 this.difficultLevel++
+					this.testRes = '恭喜及格！'
+					this.confirmText = '继续下一难度'
+				}else if(this.score>=60 && this.difficultLevel == 6){
+					 this.difficultLevel++
+					this.testRes = '恭喜及格！'
+					this.confirmText = '去加强巩固'
+					
+				}else{
+					this.testRes = '不及格哦！'
+					this.confirmText = '去背单词'
+				}
 				this.msgType = type
 				this.$refs.alertDialog.open()
+				// console.log('你的分数为',this.score)
 			},
 			//确认提交
 			dialogConfirm() {
-				console.log('点击确认')
+				if(this.score<60){
+					uni.switchTab({
+						url:"../recitation/index"
+					})
+				}else if(this.score >= 60){
+					console.log(this.difficultLevel,'当前难度等级')
+					if(this.difficultLevel <= 6){
+						uni.navigateTo({
+							url:"../answer-detail/answer-detail?wordId=" + this.difficultLevel,
+						})
+					}else if(this.difficultLevel){
+						uni.navigateTo({
+							url:"../answer-detail/answer-detail?wordId=1",
+						})
+					}
+					
+					
+				}
+				// console.log('点击确认')
+				
 				this.$refs.alertDialog.open()
 			},
 			// 关闭提交窗口
@@ -130,8 +176,13 @@
 						name:'provideQuestion',
 						data:{level:this.level,pageSize:this.pageSize}
 					})
-						this.wordData = result.data
+						this.wordData = result.resData
+						this.wordData.forEach(item=>{
+							this.rightSelectArr.push(item.means)
+						})
+					
 						console.log('题目数据获取',result)
+						console.log('正确答案',this.rightSelectArr)
 					
 				}catch(e){
 					console.error(e)
@@ -144,8 +195,9 @@
 		},
 		onLoad(option) {
 			this.level = option.wordId;
+			this.difficultLevel = option.wordId;
 				this.getApiQuestionData()
-			console.log('获取到', this.level)
+			console.log('当前难度等级：', this.level)
 		}
 	}
 </script>
