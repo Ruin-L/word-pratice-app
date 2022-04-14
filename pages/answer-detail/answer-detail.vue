@@ -1,6 +1,12 @@
 <template>
+
 	<view class="answer-root">
+<!-- 		<view class="back-home">
+			<text>< 返回首页</text>
+			
+		</view> -->
 		<view class="container" >
+			
 <view v-for="(item,index) in wordData" :key="wordData._id" >
 
 		<view v-if="index == currentIndex">
@@ -89,13 +95,22 @@
 				difficultLevel:0,
 			};
 		},
+		watch:{
+			mySelectArr(){
+				console.log('触发')
+				// this.$set(this.mySelectArr,this.mySelectArr[index],item)
+				
+			}
+		},
 		methods: {
 			// 获取当前选中的选项并存到数组中
 			getSelectedItem(item, index) {
-				this.mySelectArr[index] = item
-				this.$set(this.mySelectArr,this.mySelectArr[index],item)
+				// this.mySelectArr[index] = item
+				this.mySelectArr.splice(index,1,item)
+				// this.$set(this.mySelectArr,this.mySelectArr[index],item)
+				
 
-				console.log('当前的选项',this.mySelectArr[index])
+				console.log('当前的选项',this.mySelectArr)
 			},
 
 			// 获取上一题
@@ -135,7 +150,6 @@
 				}
 				this.msgType = type
 				this.$refs.alertDialog.open()
-				// console.log('你的分数为',this.score)
 			},
 			//确认提交
 			dialogConfirm() {
@@ -205,6 +219,7 @@
 <style lang="scss" scoped>
 	page {
 		background-color: #f2f5f8;
+		// overflow: scroll;
 
 	}
 
@@ -332,5 +347,20 @@
 	.noData{
 		font-size: 30rpx;
 		text-align: center;
+	}
+	.back-home{
+		width: 100%;
+		box-sizing: border-box;
+		line-height: 100rpx;
+		// padding: 20rpx;
+		margin-bottom: 50rpx;
+		height: 100rpx;
+		background-color: #FFFFFF;
+		font-size: 28rpx;
+		font-weight: bold;
+		border-bottom: 2rpx solid #EEEEEE;
+		text{
+			padding: 30rpx;
+		}
 	}
 </style>
