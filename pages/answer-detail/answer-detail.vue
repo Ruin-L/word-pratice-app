@@ -102,11 +102,7 @@
 
 			// 获取下一题
 			next(index) {
-				// if (this.pageSize < 10) {
-				// 	this.pageSize++
-				// }
-this.currentIndex++;
-				// this.getApiQuestionData()
+				this.currentIndex++;
 				console.log('跳转到下一题',index)
 			},
 			// 提交成功获取的信息
@@ -239,6 +235,7 @@ this.currentIndex++;
 			}
 
 			.select-item {
+			
 				text {
 					min-height: 100rpx;
 					margin: 20rpx 0;
@@ -249,7 +246,7 @@ this.currentIndex++;
 
 					border: 2rpx solid #dee1e6;
 					border-radius: 8rpx;
-					padding: 0 20rpx;
+					padding:15rpx;
 					background-color: #f2f5f8;
 					display: block;
 					display: flex;
