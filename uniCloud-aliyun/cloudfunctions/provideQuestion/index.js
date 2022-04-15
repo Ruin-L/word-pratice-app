@@ -2,10 +2,10 @@
 const db = uniCloud.database();
 exports.main = async (event, context) => {
 	//event为客户端上传的参数
-
+	let difficultLevel = event.level.toString()
 	// 根据level字段随机返回数据库中不同的数据40组
 	let res = await db.collection('allWordList').aggregate().match({
-		difficulty: event.level
+		difficulty: difficultLevel
 	}).sample({
 		size: 40
 	}).limit(40).end()

@@ -14,17 +14,7 @@
                 "enablePullDownRefresh": false
             }
             
-        },
-		{
-			"path":"pages/answer-detail/answer-detail",
-			"style" :
-			{
-			    "navigationBarTitleText": "请选择单词正确的中文含义",
-			    "enablePullDownRefresh": false,
-				"backgroundColor":"#f6f8fa",
-				"navigationBarBackgroundColor":"#FFFFFF"
-			}
-		}
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

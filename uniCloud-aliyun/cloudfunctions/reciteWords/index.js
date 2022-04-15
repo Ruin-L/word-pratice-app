@@ -4,8 +4,10 @@ exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	let count = await db.collection('allWordList').count()
 	// 根据level字段随机返回不同的数据
-	
-	let res = await db.collection('allWordList').aggregate().sample({
+	const level = event.level.toString();
+	let res = await db.collection('allWordList').aggregate().match({
+		difficulty: level
+	}).sample({
 		size: event.pageSize
 	}).limit(event.pageSize).end()
 	res.total = count.total;
