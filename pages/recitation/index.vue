@@ -78,6 +78,15 @@
 				}
 			};
 		},
+		watch: {
+			level(newName, oldName) {
+				console.log('值发生变化')
+				this.wordData.length = 0;
+				this.getApiQuestionData()
+				// this.wordData.reverse();
+			},
+			immediate: true
+		},
 		methods: {
 
 			// 获取上一题
@@ -91,7 +100,7 @@
 			// 获取下一题
 			next(index, wordName) {
 				this.currentIndex++;
-				if (this.currentIndex % 20 == 1) {
+				if (this.currentIndex % 20 == 17) {
 					this.getApiQuestionData();
 				}
 				this.audio = this.wordData[index + 1].wordName;
@@ -101,33 +110,39 @@
 
 			// 调用云函数获取数据
 			async getApiQuestionData() {
+
 				this.getLevelFromStorage();
+				uni.showLoading({
+					title: '加载中'
+				});
 				try {
+
 					const {
 						result
 					} = await uniCloud.callFunction({
 						name: 'reciteWords',
 						data: {
 							pageSize: this.pageSize,
-							level:this.level
+							level: this.level
 						}
 					})
-					result.res.data.forEach(e => {
-						this.wordData.push(e);
-					})
+					if (this.wordData)
+						result.res.data.forEach(e => {
+							this.wordData.push(e);
+						})
+					// this.wordData.reverse();
 					this.pageNum = result.res.total
 					if (this.wordData.length < 22) {
 						this.audio = this.wordData[0].wordName;
 						this.getAudioResource()
 					}
-
+					uni.hideLoading();
 
 
 					console.log('题目数据获取', this.wordData)
 
 				} catch (e) {
 					console.error(e)
-					//TODO handle the exception
 				}
 
 
@@ -138,24 +153,28 @@
 				this.current.src = 'http://dict.youdao.com/dictvoice?type=0&audio=' + this.audio
 				console.log(this.current.src)
 			},
-			
+
 			// 从缓存中获取到难度等级
-			getLevelFromStorage(){
-				try{
+			getLevelFromStorage() {
+				try {
 					const value = uni.getStorageSync('level_type')
 					this.level = value;
-					if(this.level){
-						console.log('目前的缓存中的题目难度',this.level)
+					if (this.level) {
+						console.log('目前的缓存中的题目难度', this.level)
 					}
-				}catch(e){
+				} catch (e) {
 					console.log(e)
 				}
 			}
 		},
 		onLoad() {
-			this.getApiQuestionData()
+			// this.getApiQuestionData()
 		},
-		onShow(){
+		onShow() {
+			this.getLevelFromStorage();
+			console.log('获取背诵题目')
+
+
 		}
 	}
 </script>

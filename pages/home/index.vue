@@ -7,7 +7,7 @@
 					<!-- 题目选项卡模块开始 -->
 					<view class="answer-box">
 						<view class="title">
-							<text class="left-title">单选题（难度等级{{item.difficulty}}）</text>
+							<text class="left-title">单选题（难度等级：{{item.difficulty}}）</text>
 							<text class="right-condition">
 								<text>{{index+1}}</text>
 								<text>/{{pageNum}}</text>
@@ -121,6 +121,7 @@
 				this.currentIndex++;
 				console.log('跳转到下一题', source)
 			},
+			
 			// 提交成功获取的信息
 			messageToggle(type) {
 				for (let i = 0; i < this.pageNum; i++) {
@@ -135,7 +136,7 @@
 					this.testRes = '恭喜及格！'
 					this.confirmText = '继续下一难度'
 				} else if (this.score >= 60 && this.level == 6) {
-					this.level = 1;
+					this.level++
 					this.testRes = '恭喜及格！'
 					this.confirmText = '去加强巩固'
 				} else {
@@ -145,33 +146,40 @@
 				this.msgType = type
 				this.$refs.alertDialog.open()
 			},
-			//右边选项
+			//右边选项(继续下一难度｜｜背单词 ||加强巩固)
 			dialogConfirm() {
-				if (this.score < 60) {
-				this.resetParams(0);
+				if (this.score < 60 ) {
+				this.resetParams();
 				uni.switchTab({
 					url:"../recitation/index"
 				})
-				} else if (this.score >= 60) {
+				} else if (this.score >= 60 && this.level <=6) {
 					console.log('当前难度等级',this.level)
-					if (this.level <= 6) {
-					this.resetParams(1)
-					} else {
-						this.resetParams(2)
-					}
+					this.resetParams()
+				}else if(this.score >= 60 && this.level == 7){
+					this.level =1;
+					this.resetParams()
 				}
-				this.setStorageData()
 				this.$refs.alertDialog.open()
 			},
+			
 			// 左边选项（重新做题）
 			dialogClose() {
-			this.resetParams(0);
-			this.setStorageData()
-				// console.log('继续下一难度')
+				if(this.score>=60 && this.level <=6){
+					this.level = this.level -1;
+				}else if(this.level == 7){
+					this.level = 6;
+				}
+			this.resetParams();
+			
+			console.log('重新做题')
 			},
 
 			// 调用云函数获取数据
 			async getApiQuestionData() {
+				uni.showLoading({
+					title: '加载中'
+				});
 				try {
 					const {
 						result
@@ -186,12 +194,15 @@
 					this.wordData.forEach(item => {
 						this.rightSelectArr.push(item.means)
 					})
-
+					this.setStorageData();
 					console.log('题目数据获取', result)
 					console.log('正确答案', this.rightSelectArr)
+					uni.hideLoading();
 
 				} catch (e) {
 					console.error(e)
+					uni.hideLoading();
+					
 					//TODO handle the exception
 				}
 
@@ -199,16 +210,12 @@
 			},
 
 			// 初始化参数
-			resetParams(condition){
+			resetParams(){
 				this.wordData = [];
 				this.mySelectArr = [];
 				this.rightSelectArr = [];
 				this.currentIndex = 0;
 				this.score = 0;
-				//0=分数及格 1=不及格 2=难度到达6
-				if(condition == 2){
-					this.level = 1;
-				}
 				this.getApiQuestionData();
 			},
 			
@@ -223,11 +230,12 @@
 		},
 		
 		onLoad(option) {
-			this.setStorageData()
+		this.setStorageData()
 			this.getApiQuestionData()
 			console.log('当前难度等级：', this.level)
 		},
 		onShow() {
+			// this.getApiQuestionData()
 			console.log('背单词页面显示')
 		
 			// this.$forceUpdate();
@@ -340,6 +348,7 @@
 				}
 
 				.isSelected {
+					transition: all 0.2s; 
 					border: 2rpx solid #007AFF;
 					background-color: rgba(52, 152, 219, 0.3)
 				}
