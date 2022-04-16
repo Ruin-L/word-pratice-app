@@ -91,9 +91,10 @@
 
 			// 获取上一题
 			previous(index, wordName) {
-				this.getAudioResource()
+				
 				this.currentIndex--;
 				this.audio = this.wordData[index - 1].wordName;
+				this.getAudioResource()
 				console.log('回到上一题', index, this.wordData[index - 1].wordName)
 			},
 
